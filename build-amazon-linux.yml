@@ -1,0 +1,44 @@
+name: Build and Zip on Amazon Linux
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # GitHub uses this to host the Docker container
+
+    container:
+      image: amazonlinux:2023  # Amazon Linux container environment
+
+    steps:
+    - name: Install dependencies
+      run: |
+        yum update -y
+        yum install -y unzip zip tar curl wget git sudo
+        # Install .NET SDK
+        curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 8.0
+        echo 'export DOTNET_ROOT=$HOME/.dotnet' >> $GITHUB_ENV
+        echo 'export PATH=$HOME/.dotnet:$PATH' >> $GITHUB_ENV
+
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Build project
+      run: |
+        source $GITHUB_ENV
+        dotnet restore
+        dotnet build --configuration Release
+
+    - name: Zip build output
+      run: |
+        mkdir output
+        zip -r output/build.zip ./bin/Release
+
+    - name: Upload zipped build
+      uses: actions/upload-artifact@v4
+      with:
+        name: zipped-build
+        path: output/build.zip
+
