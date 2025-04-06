@@ -20,7 +20,7 @@ jobs:
           echo "[$(date)] INFO: Workflow finished" >> logs/workflow.log
 
       - name: Upload log file
-        uses: actions/upload-artifact@v3
+       uses: actions/upload-artifact@v3.1.3
         with:
           name: workflow-logs
           path: logs/workflow.log
