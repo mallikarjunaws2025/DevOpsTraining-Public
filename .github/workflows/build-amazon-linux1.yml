@@ -1,43 +1,26 @@
-name: Build and Zip on Amazon Linux
+name: Log to File
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest  # Host runner, but we'll use a Docker container
-
-    container:
-      image: amazonlinux:2023  # You can also use amazonlinux:2 if preferred
+  log-job:
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Install dependencies
-      run: |
-        yum update -y
-        yum install -y unzip zip tar curl wget git sudo
-        # Install .NET SDK manually
-        curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 8.0
-        echo 'export DOTNET_ROOT=$HOME/.dotnet' >> $GITHUB_ENV
-        echo 'export PATH=$HOME/.dotnet:$PATH' >> $GITHUB_ENV
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Create log file and write messages
+        run: |
+          mkdir -p logs
+          echo "[$(date)] INFO: Workflow started" >> logs/workflow.log
+          echo "[$(date)] INFO: Doing some work..." >> logs/workflow.log
+          echo "[$(date)] INFO: Workflow finished" >> logs/workflow.log
 
-    - name: Build project
-      run: |
-        source $GITHUB_ENV
-        dotnet restore
-        dotnet build --configuration Release
-
-    - name: Zip build output
-      run: |
-        mkdir output
-        zip -r output/build.zip ./bin/Release
-
-    - name: Upload zipped build
-      uses: actions/upload-artifact@v4
-      with:
-        name: zipped-build
-        path: output/build.zip
+      - name: Upload log file
+        uses: actions/upload-artifact@v3
+        with:
+          name: workflow-logs
+          path: logs/workflow.log
