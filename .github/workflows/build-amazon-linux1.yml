@@ -18,9 +18,3 @@ jobs:
           echo "[$(date)] INFO: Workflow started" >> logs/workflow.log
           echo "[$(date)] INFO: Doing some work..." >> logs/workflow.log
           echo "[$(date)] INFO: Workflow finished" >> logs/workflow.log
-
-      - name: Upload log file
-        uses: ./.github/actions/upload-artifact
-        with:
-          name: workflow-logs
-          path: logs/workflow.log
